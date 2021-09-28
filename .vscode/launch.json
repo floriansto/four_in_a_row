@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'four_in_a_row'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=four_in_a_row",
+                    "--package=four_in_a_row"
+                ],
+                "filter": {
+                    "name": "four_in_a_row",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'four_in_a_row'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=four_in_a_row",
+                    "--package=four_in_a_row"
+                ],
+                "filter": {
+                    "name": "four_in_a_row",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
