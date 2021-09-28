@@ -19,26 +19,53 @@ impl Rules {
                     if col.len() < board.winning_condition {
                         continue;
                     }
-                    let max_idx = col.len() - board.winning_condition;
-                    for (idx, &i) in col.iter().enumerate() {
-                        if idx > max_idx || i != *player {
+                    let mut vert_counter = 0;
+                    for i in col {
+                        if i != player {
+                            vert_counter = 0;
                             continue;
                         }
-                        let mut wins = true;
-                        for j in &col[idx..board.winning_condition] {
-                            wins &= j == player;
-                            if !wins {
-                                break;
-                            }
-                        }
-                        if wins {
-                            return wins;
+                        vert_counter += 1;
+                        if vert_counter == board.winning_condition {
+                            return true;
                         }
                     }
                 }
                 false
             }
-            Rules::HorizontalWin => false,
+            Rules::HorizontalWin => {
+                let max_idx = board.data.len() - board.winning_condition;
+                for (idx, col) in board.data.iter().enumerate() {
+                    if col.len() == 0 {
+                        continue;
+                    }
+                    if idx > max_idx {
+                        break;
+                    }
+                    let mut skip_rows = false;
+                    for (row_idx, &row) in col.iter().enumerate() {
+                        if row != *player {
+                            continue;
+                        }
+                        for idx2 in idx + 1..idx + board.winning_condition {
+                            if board.data[idx2].len() <= row_idx {
+                                skip_rows = true;
+                                break;
+                            }
+                            if board.data[idx2][row_idx] != *player {
+                                break;
+                            }
+                            if idx2 == idx + board.winning_condition - 1 {
+                                return true;
+                            }
+                        }
+                        if skip_rows {
+                            break;
+                        }
+                    }
+                }
+                false
+            }
         };
         false
     }
@@ -76,6 +103,9 @@ impl Board {
     }
 
     fn put_stone_in_col(&mut self, player: Field, col: usize) -> Result<Field, &str> {
+        if self.data.len() <= col {
+            return Err("No such column");
+        }
         if self.data[col].len() >= self.rows {
             Err("The selected column is full")
         } else {
@@ -96,9 +126,9 @@ fn main() {
         Ok(_) => (),
     };
 
-    for _ in 1..10 {
-        match board.put_stone_in_col(Field::Player1, 2) {
-            Err(e) => println!("{}", e),
+    for i in 0..10 {
+        match board.put_stone_in_col(Field::Player1, i) {
+            Err(e) => println!("Column {}: {}", i, e),
             Ok(_) => (),
         };
     }
