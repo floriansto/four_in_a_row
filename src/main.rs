@@ -16,16 +16,16 @@ impl Rules {
         match self {
             Rules::VerticalWin => {
                 for col in &board.data {
-                    if col.data.len() < board.winning_condition {
+                    if col.len() < board.winning_condition {
                         continue;
                     }
-                    let max_idx = col.data.len() - board.winning_condition;
-                    for (idx, &i) in col.data.iter().enumerate() {
+                    let max_idx = col.len() - board.winning_condition;
+                    for (idx, &i) in col.iter().enumerate() {
                         if idx > max_idx || i != *player {
                             continue;
                         }
                         let mut wins = true;
-                        for j in &col.data[idx..board.winning_condition] {
+                        for j in &col[idx..board.winning_condition] {
                             wins &= j == player;
                             if !wins {
                                 break;
@@ -44,34 +44,19 @@ impl Rules {
     }
 }
 
-#[derive(Debug, Clone)]
-struct Column {
-    max_height: usize,
-    current_height: usize,
-    data: Vec<Field>,
-}
-
 struct Board {
+    rows: usize,
     winning_condition: usize,
-    data: Vec<Column>,
+    data: Vec<Vec<Field>>,
     rules: Vec<Rules>,
-}
-
-impl Column {
-    fn new(max_height: usize) -> Column {
-        Column {
-            max_height,
-            current_height: 0,
-            data: Vec::new(),
-        }
-    }
 }
 
 impl Board {
     fn new(cols: usize, rows: usize, winning_condition: usize) -> Board {
         Board {
+            rows,
             winning_condition,
-            data: vec![Column::new(rows); cols],
+            data: vec![Vec::new(); cols],
             rules: Vec::new(),
         }
     }
@@ -91,12 +76,10 @@ impl Board {
     }
 
     fn put_stone_in_col(&mut self, player: Field, col: usize) -> Result<Field, &str> {
-        let col: &mut Column = &mut self.data[col];
-        if col.current_height >= col.max_height {
+        if self.data[col].len() >= self.rows {
             Err("The selected column is full")
         } else {
-            col.current_height += 1;
-            col.data.push(player);
+            self.data[col].push(player);
             Ok(player)
         }
     }
