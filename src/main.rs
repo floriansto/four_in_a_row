@@ -115,6 +115,41 @@ impl Board {
     }
 }
 
+struct BoardVisual {
+    board: Board,
+}
+
+impl BoardVisual {
+    fn new(board: Board) -> BoardVisual {
+        BoardVisual { board }
+    }
+
+    fn draw(&self) {
+        let s = "-".repeat(self.board.data.len() * 2 + 1);
+        println!("{}", s);
+        for row in (0..self.board.rows).rev() {
+            let mut idx = 0;
+            for col in &self.board.data {
+                if col.len() <= row {
+                    print! {"| "};
+                } else {
+                    if col[row] == Field::Player1 {
+                        print!("|o");
+                    } else {
+                        print!("|x");
+                    }
+                }
+                if idx == self.board.data.len() - 1 {
+                    print!("|");
+                }
+                idx += 1;
+            }
+            println!();
+            println!("{}", s);
+        }
+    }
+}
+
 fn main() {
     let mut board = Board::new(7, 5, 4);
 
@@ -137,4 +172,7 @@ fn main() {
         true => println!("Player 1 wins"),
         false => println!("No win"),
     };
+
+    let board_v = BoardVisual::new(board);
+    board_v.draw();
 }
