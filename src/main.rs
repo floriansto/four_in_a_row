@@ -179,6 +179,57 @@ impl Game {
         self.players.push(player)
     }
 
+    fn do_turn(&self, board: &mut Board, player: &Field) -> bool {
+        let name;
+        match player {
+            Field::Player1 => name = "Player 1".to_string(),
+            Field::Player2 => name = "Player 2".to_string(),
+        }
+        board.draw();
+        println!("{} it's your turn!", name);
+
+        let selection: usize;
+        loop {
+            let mut player_col = String::new();
+            io::stdin()
+                .read_line(&mut player_col)
+                .expect("Failed to read line");
+
+            selection = match player_col.trim().parse() {
+                Ok(num) => {
+                    if num > 0 && num <= board.data.len() {
+                        num
+                    } else {
+                        println!("Enter a number between 1 and {}", board.data.len());
+                        continue;
+                    }
+                }
+                Err(_) => {
+                    println!("Enter a number between 1 and {}", board.data.len());
+                    continue;
+                }
+            };
+            break;
+        }
+
+        match board.put_stone_in_col(*player, selection - 1) {
+            Err(e) => println!("Column {}: {}", selection - 1, e),
+            Ok(_) => (),
+        };
+
+        match self.is_player_winning(&board, *player) {
+            true => {
+                println!("{} wins!", name);
+                board.draw();
+                return true;
+            }
+            false => {
+                println!("Next player!");
+                return false;
+            }
+        };
+    }
+
     fn run(&mut self) {
         let mut board = Board::new(7, 5);
 
@@ -190,32 +241,9 @@ impl Game {
 
         loop {
             for p in &self.players {
-                let name;
-                match p {
-                    Field::Player1 => name = "Player 1".to_string(),
-                    Field::Player2 => name = "Player 2".to_string(),
-                }
-                board.draw();
-                println!("{} it's your turn!", name);
-                let mut player_col = String::new();
-                io::stdin()
-                    .read_line(&mut player_col)
-                    .expect("Failed to read line");
-
-                let selection: usize = player_col.trim().parse().expect("Please type a number!");
-
-                match board.put_stone_in_col(*p, selection) {
-                    Err(e) => println!("Column {}: {}", selection, e),
-                    Ok(_) => (),
-                };
-
-                match self.is_player_winning(&board, *p) {
-                    true => {
-                        println!("{} wins!", name);
-                        board.draw();
-                        return;
-                    }
-                    false => println!("Next player!"),
+                match self.do_turn(&mut board, &p) {
+                    true => return,
+                    false => (),
                 };
             }
         }
