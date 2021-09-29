@@ -114,18 +114,18 @@ impl Board {
     }
 
     fn draw(&self) {
-        let s = "-".repeat(self.data.len() * 2 + 1);
-        println!("{}", s);
+        let s = "-".repeat(self.data.len() * 4 + 1);
+        println!("\n{}", s);
         for row in (0..self.rows).rev() {
             let mut idx = 0;
             for col in &self.data {
                 if col.len() <= row {
-                    print! {"| "};
+                    print! {"|   "};
                 } else {
                     if col[row] == Field::Player1 {
-                        print!("|o");
+                        print!("| o ");
                     } else {
-                        print!("|x");
+                        print!("| x ");
                     }
                 }
                 if idx == self.data.len() - 1 {
@@ -136,6 +136,11 @@ impl Board {
             println!();
             println!("{}", s);
         }
+        for (idx, _) in self.data.iter().enumerate() {
+            print!("  {} ", idx + 1);
+        }
+        println!();
+        println!();
     }
 
     fn put_stone_in_col(&mut self, player: Field, col: usize) -> Result<Field, &str> {
@@ -191,6 +196,7 @@ impl Game {
         let selection: usize;
         loop {
             let mut player_col = String::new();
+            println!("Select your column:");
             io::stdin()
                 .read_line(&mut player_col)
                 .expect("Failed to read line");
@@ -219,14 +225,11 @@ impl Game {
 
         match self.is_player_winning(&board, *player) {
             true => {
-                println!("{} wins!", name);
                 board.draw();
+                println!("{} wins!", name);
                 return true;
             }
-            false => {
-                println!("Next player!");
-                return false;
-            }
+            false => return false,
         };
     }
 
