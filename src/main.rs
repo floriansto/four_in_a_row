@@ -15,58 +15,65 @@ impl Rules {
     fn evaluate(&self, board: &Board, player: &Field) -> bool {
         match self {
             Rules::VerticalWin => {
-                for col in &board.data {
-                    if col.len() < board.winning_condition {
-                        continue;
-                    }
-                    let mut vert_counter = 0;
-                    for i in col {
-                        if i != player {
-                            vert_counter = 0;
-                            continue;
-                        }
-                        vert_counter += 1;
-                        if vert_counter == board.winning_condition {
-                            return true;
-                        }
-                    }
-                }
-                false
+                return self.evaluate_vertical(board, player);
             }
             Rules::HorizontalWin => {
-                let max_idx = board.data.len() - board.winning_condition;
-                for (idx, col) in board.data.iter().enumerate() {
-                    if col.len() == 0 {
-                        continue;
-                    }
-                    if idx > max_idx {
-                        break;
-                    }
-                    let mut skip_rows = false;
-                    for (row_idx, &row) in col.iter().enumerate() {
-                        if row != *player {
-                            continue;
-                        }
-                        for idx2 in idx + 1..idx + board.winning_condition {
-                            if board.data[idx2].len() <= row_idx {
-                                skip_rows = true;
-                                break;
-                            }
-                            if board.data[idx2][row_idx] != *player {
-                                break;
-                            }
-                            if idx2 == idx + board.winning_condition - 1 {
-                                return true;
-                            }
-                        }
-                        if skip_rows {
-                            break;
-                        }
-                    }
-                }
-                false
+                return self.evaluate_horizontal(board, player);
             }
         };
+    }
+
+    fn evaluate_vertical(&self, board: &Board, player: &Field) -> bool {
+        for col in &board.data {
+            if col.len() < board.winning_condition {
+                continue;
+            }
+            let mut vert_counter = 0;
+            for i in col {
+                if i != player {
+                    vert_counter = 0;
+                    continue;
+                }
+                vert_counter += 1;
+                if vert_counter == board.winning_condition {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    fn evaluate_horizontal(&self, board: &Board, player: &Field) -> bool {
+        let max_idx = board.data.len() - board.winning_condition;
+        for (idx, col) in board.data.iter().enumerate() {
+            if col.len() == 0 {
+                continue;
+            }
+            if idx > max_idx {
+                break;
+            }
+            let mut skip_rows = false;
+            for (row_idx, &row) in col.iter().enumerate() {
+                if row != *player {
+                    continue;
+                }
+                for idx2 in idx + 1..idx + board.winning_condition {
+                    if board.data[idx2].len() <= row_idx {
+                        skip_rows = true;
+                        break;
+                    }
+                    if board.data[idx2][row_idx] != *player {
+                        break;
+                    }
+                    if idx2 == idx + board.winning_condition - 1 {
+                        return true;
+                    }
+                }
+                if skip_rows {
+                    break;
+                }
+            }
+        }
         false
     }
 }
