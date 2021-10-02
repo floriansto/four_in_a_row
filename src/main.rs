@@ -255,7 +255,7 @@ impl Game {
         board.draw();
         println!("{} it's your turn!", name);
 
-        let selection: usize;
+        let mut selection: usize;
         loop {
             let mut player_col = String::new();
             println!("Select your column:");
@@ -277,13 +277,11 @@ impl Game {
                     continue;
                 }
             };
-            break;
+            match board.put_stone_in_col(*player, selection - 1) {
+                Err(e) => println!("Column {}: {}", selection, e),
+                Ok(_) => break,
+            };
         }
-
-        match board.put_stone_in_col(*player, selection - 1) {
-            Err(e) => println!("Column {}: {}", selection - 1, e),
-            Ok(_) => (),
-        };
 
         match self.is_player_winning(&board, *player) {
             true => {
@@ -296,7 +294,7 @@ impl Game {
     }
 
     fn run(&mut self) {
-        let mut board = Board::new(7, 5);
+        let mut board = Board::new(7, 6);
 
         self.register_rule(WinningCombinations::HorizontalWin);
         self.register_rule(WinningCombinations::VerticalWin);
