@@ -42,7 +42,11 @@ impl Rules {
                     };
                 }
                 WinningCombinations::DiagonalWin => {
-                    match self.evaluate_diagonal(board, player) {
+                    match self.evaluate_diagonal(board, player, false) {
+                        true => return true,
+                        false => (),
+                    };
+                    match self.evaluate_diagonal(board, player, true) {
                         true => return true,
                         false => (),
                     };
@@ -52,30 +56,48 @@ impl Rules {
         false
     }
 
-    fn evaluate_diagonal(&self, board: &Board, player: &Field) -> bool {
+    fn evaluate_diagonal(&self, board: &Board, player: &Field, downwoards: bool) -> bool {
         let max_idx_hor = board.data.len() - self.winning_condition;
         let max_idx_ver = board.rows - self.winning_condition;
         for (idx, col) in board.data.iter().enumerate() {
-            if col.len() == 0 {
+            let skip_cond;
+            if !downwoards {
+                skip_cond = col.len() == 0;
+            } else {
+                skip_cond = col.len() < self.winning_condition;
+            }
+            if skip_cond {
                 continue;
             }
             if idx > max_idx_hor {
                 break;
             }
             for (idx_v, row) in col.iter().enumerate() {
-                if idx_v > max_idx_ver {
-                    break;
+                if !downwoards {
+                    if idx_v > max_idx_ver {
+                        break;
+                    }
+                } else {
+                    if idx_v < self.winning_condition - 1 {
+                        continue;
+                    }
                 }
                 if row != player {
                     break;
                 }
                 let mut win = true;
                 for i in 1..self.winning_condition {
-                    if board.data[idx + i].len() < idx_v + i + 1 {
+                    let next_row_idx;
+                    if !downwoards {
+                        next_row_idx = idx_v + i;
+                    } else {
+                        next_row_idx = idx_v - i;
+                    }
+                    if board.data[idx + i].len() < next_row_idx + 1 {
                         win = false;
                         break;
                     }
-                    win &= &board.data[idx + i][idx_v + i] == player;
+                    win &= &board.data[idx + i][next_row_idx] == player;
                 }
                 if win {
                     return win;
