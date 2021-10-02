@@ -10,6 +10,7 @@ enum Field {
 enum WinningCombinations {
     VerticalWin,
     HorizontalWin,
+    DiagonalWin,
 }
 
 struct Rules {
@@ -40,7 +41,46 @@ impl Rules {
                         false => (),
                     };
                 }
+                WinningCombinations::DiagonalWin => {
+                    match self.evaluate_diagonal(board, player) {
+                        true => return true,
+                        false => (),
+                    };
+                }
             };
+        }
+        false
+    }
+
+    fn evaluate_diagonal(&self, board: &Board, player: &Field) -> bool {
+        let max_idx_hor = board.data.len() - self.winning_condition;
+        let max_idx_ver = board.rows - self.winning_condition;
+        for (idx, col) in board.data.iter().enumerate() {
+            if col.len() == 0 {
+                continue;
+            }
+            if idx > max_idx_hor {
+                break;
+            }
+            for (idx_v, row) in col.iter().enumerate() {
+                if idx_v > max_idx_ver {
+                    break;
+                }
+                if row != player {
+                    break;
+                }
+                let mut win = true;
+                for i in 1..self.winning_condition {
+                    if board.data[idx + i].len() < idx_v + i + 1 {
+                        win = false;
+                        break;
+                    }
+                    win &= &board.data[idx + i][idx_v + i] == player;
+                }
+                if win {
+                    return win;
+                }
+            }
         }
         false
     }
@@ -238,6 +278,7 @@ impl Game {
 
         self.register_rule(WinningCombinations::HorizontalWin);
         self.register_rule(WinningCombinations::VerticalWin);
+        self.register_rule(WinningCombinations::DiagonalWin);
 
         self.add_player(Field::Player1);
         self.add_player(Field::Player2);
